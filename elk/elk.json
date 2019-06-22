@@ -1,0 +1,79 @@
+#สร้าง tokenizer
+POST _analyze
+{
+  "tokenizer": "ngram",
+  "text": "Karn smooth"
+}
+
+#สร้าง analyzer
+PUT my_index
+{
+  "settings": {
+    "index":{
+      "max_ngram_diff": 10
+    },
+    "analysis": {
+      "analyzer": {
+        "my_analyzer": {
+          "tokenizer": "my_tokenizer",
+          "filter":[
+              "lowercase"
+              ]
+        }
+      },
+      "tokenizer": {
+        "my_tokenizer": {
+          "type": "ngram",
+          "min_gram": 1,
+          "max_gram": 3
+        }
+      }
+    }
+  }
+}
+
+#ทดสอบ analyzer ที่สร้างมา
+GET my_index/_analyze
+{
+  "analyzer": "my_analyzer", 
+  "text":"Karn smooth"
+}
+
+#เพิ่ม analyzer
+PUT my_index/_mapping
+{
+    "properties": {
+      "name":{
+        "type": "text", 
+        "analyzer": "my_analyzer"
+      }
+    }
+}
+
+#ทดสอบ analyzer ที่เก็บใน database
+GET my_index/_analyze
+{
+  "field": "name",
+  "text": "Karn smooth"
+}
+
+#เพิ่มข้อมูลลงใน database
+POST my_index/_doc
+{
+  "name": "Karn smooth"
+}
+
+#ค้นหาคำที่ทำการ tokenizer, analyzer
+GET my_index/_search
+{
+  "query": {
+    "term": {
+      "name": {
+        "value": "ar"
+      }
+    }
+  }
+}
+
+#ลบ index ทิ้ง
+DELETE my_index
